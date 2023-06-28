@@ -16,6 +16,7 @@ import ExpandIconButton from './ExpandIconButton';
 import { GetAllCategories } from '@/services/category';
 import { UpdateSubtaskStatus } from '@/services/subTask';
 import { AddTodo, UpdateTodoStatus } from '@/services/todo';
+import { Item } from './Item';
 
 const label = { inputProps: { 'aria-label': 'Todo checkbox' } };
 
@@ -44,9 +45,9 @@ export function CategoryCard({
           </Typography>
           <Typography variant="h6">
             <ExpandIconButton
-              expand={expandedIndex === index}
+              expand={expandedIndex === index ? true : undefined}
               onClick={() => handleExpandClick(index)}
-              aria-expanded={expandedIndex === index}
+              aria-expanded={expandedIndex === index ? true : undefined}
               aria-label="show more"
             >
               <KeyboardArrowDown />
@@ -58,47 +59,14 @@ export function CategoryCard({
         <CardContent>
           {category.todos.map((todo) => (
             <>
-              <Box sx={{ display: 'flex', marginLeft: '15px' }}>
-                <Box>
-                  <Checkbox
-                    checked={todo.completed}
-                    onChange={(e) => handleCheckBox(e, todo._id, true)}
-                    {...label}
-                  />
-                </Box>
-                <Typography
-                  sx={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                  }}
-                >
-                  {todo.title}
-                </Typography>
-              </Box>
+              <Item item={todo} handleCheckBox={handleCheckBox} todo={true} />
               {todo.subtasks.map((subtask, index) => (
                 <>
-                  <Typography
-                    key={index}
-                    sx={{ display: 'flex', marginLeft: '45px' }}
-                  >
-                    <Typography>
-                      <Checkbox
-                        checked={subtask.completed}
-                        {...label}
-                        onChange={(e) => handleCheckBox(e, subtask._id, false)}
-                      />
-                    </Typography>
-                    <Typography
-                      sx={{
-                        display: 'flex',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                      }}
-                    >
-                      {subtask.title}
-                    </Typography>
-                  </Typography>
+                  <Item
+                    item={todo}
+                    handleCheckBox={handleCheckBox}
+                    todo={false}
+                  />
                 </>
               ))}
             </>

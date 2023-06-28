@@ -33,3 +33,13 @@ interface CategoryCardProps {
     todo: boolean
   ) => Promise<void>;
 }
+
+interface ItemProps {
+  item: { completed: boolean; title: string; _id: string };
+  todo: boolean;
+  handleCheckBox: (
+    e: ChangeEvent<HTMLInputElement>,
+    id: string,
+    todo: boolean
+  ) => Promise<void>;
+}
