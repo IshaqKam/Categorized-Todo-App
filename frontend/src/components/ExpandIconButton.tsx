@@ -2,7 +2,7 @@ import IconButton, { IconButtonProps } from '@mui/material/IconButton';
 import { styled } from '@mui/material/styles';
 
 interface ExpandIconButtonProps extends IconButtonProps {
-  expand: boolean;
+  expand: boolean | undefined;
 }
 
 const ExpandIconButton = styled(IconButton)<ExpandIconButtonProps>(
