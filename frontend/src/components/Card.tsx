@@ -73,6 +73,9 @@ export default function CardBox() {
         padding: '10px',
         overflowY: 'auto',
         borderTop: '10px solid black',
+        borderRadius: '5px',
+        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
+        backgroundColor: '#e5e5e5',
       }}
     >
       {categories.map((category, index) => (
