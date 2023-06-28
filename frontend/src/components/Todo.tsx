@@ -1,11 +1,11 @@
 import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
-import CardBox from './card';
+import CardBox from './Card';
 
 const CategorizedTodoListPage = () => {
   return (
     <Container>
-      <Typography variant="h4" component="h1" gutterBottom>
+      <Typography variant="h3" align="center" component="h1" gutterBottom>
         Categorized Todo List
       </Typography>
       <Box
