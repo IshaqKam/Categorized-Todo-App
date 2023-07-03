@@ -10,3 +10,15 @@ export async function GetAllCategories(): Promise<ICategory[]> {
     return [];
   }
 }
+
+export async function AddCategory({ name }: { name: string }) {
+  try {
+    const response = await axios.post(`${API_BASE_URL}/api/category`, {
+      name,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(error);
+    return [];
+  }
+}
