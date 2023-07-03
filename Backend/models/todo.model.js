@@ -16,6 +16,10 @@ const todoSchema = mongoose.Schema(
       ref: 'Category',
       required: true,
     },
+    due_date: {
+      type: Date,
+      required: true,
+    },
     subtasks: [
       {
         type: mongoose.Schema.Types.ObjectId,
