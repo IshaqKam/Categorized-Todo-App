@@ -21,8 +21,8 @@ const getTodosByCategoryId = asyncHandler(async (req, res) => {
 });
 
 const createTodo = asyncHandler(async (req, res) => {
-  const { title, categoryId } = req.body;
-  if (!title || !categoryId) {
+  const { title, categoryId, due_date } = req.body;
+  if (!title || !categoryId || !due_date) {
     res.status(400);
     throw new Error('All fields are mandatory !');
   }
@@ -30,6 +30,7 @@ const createTodo = asyncHandler(async (req, res) => {
     // Create the todo item
     const todo = await Todo.create({
       title,
+      due_date,
       category: categoryId,
     });
 
