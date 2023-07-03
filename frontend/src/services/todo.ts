@@ -21,14 +21,17 @@ export async function UpdateTodoStatus({
 
 export async function AddTodo({
   categoryId,
+  due_date,
   title,
 }: {
-  categoryId: string;
   title: string;
+  due_date: string;
+  categoryId: string;
 }) {
   try {
     const response = await axios.post(`${API_BASE_URL}/api/todo/`, {
       title,
+      due_date,
       categoryId,
     });
     return response.data;
