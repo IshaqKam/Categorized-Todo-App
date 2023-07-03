@@ -1,97 +1,161 @@
-import { useEffect, useState, ChangeEvent } from 'react';
-import { KeyboardArrowDown, Add } from '@mui/icons-material';
+import { Add, Folder, DateRange, KeyboardArrowDown } from '@mui/icons-material';
 import {
   InputAdornment,
   IconButton,
   Collapse,
   CardContent,
-  Card,
   Typography,
   Box,
   TextField,
-  Checkbox,
+  Divider,
 } from '@mui/material';
 
 import ExpandIconButton from './ExpandIconButton';
-import { GetAllCategories } from '@/services/category';
-import { UpdateSubtaskStatus } from '@/services/subTask';
-import { AddTodo, UpdateTodoStatus } from '@/services/todo';
 import { Item } from './Item';
-
-const label = { inputProps: { 'aria-label': 'Todo checkbox' } };
 
 export function CategoryCard({
   title,
   index,
+  subtask,
+  setDate,
   category,
   setTitle,
+  setSubtask,
+  addTodoError,
   expandedIndex,
   handleAddTask,
   handleCheckBox,
+  addSubtaskError,
+  handleAddSubtask,
   handleExpandClick,
 }: CategoryCardProps) {
   return (
-    <>
+    <Box>
       <Box
         sx={{
           display: 'flex',
           justifyContent: 'space-between',
-          margin: '0px 0px -10px 0px',
+          margin: '5px',
+          alignItems: 'center',
         }}
       >
-        <>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ marginRight: '5px' }}>
+            <Folder color="disabled" />
+          </Box>
           <Typography variant="body1" sx={{ fontWeight: 600 }}>
             {category.name}
           </Typography>
-          <Typography variant="h6">
+        </Box>
+        <Divider variant="fullWidth" sx={{ width: '30%' }} />
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Box sx={{ marginLeft: '5px', marginRight: '5px' }}>
             <ExpandIconButton
               expand={expandedIndex === index ? true : undefined}
               onClick={() => handleExpandClick(index)}
-              aria-expanded={expandedIndex === index ? true : undefined}
-              aria-label="show more"
             >
               <KeyboardArrowDown />
             </ExpandIconButton>
-          </Typography>
-        </>
+          </Box>
+          <Box
+            sx={{
+              backgroundColor: 'black',
+              paddingX: '5px',
+              borderRadius: '5px',
+            }}
+          >
+            <Typography
+              sx={{ color: 'white', fontWeight: '700' }}
+              variant="body1"
+            >
+              {category.todos.length}
+            </Typography>
+          </Box>
+        </Box>
       </Box>
       <Collapse in={expandedIndex === index} timeout="auto" unmountOnExit>
         <CardContent>
-          {category.todos.map((todo) => (
+          {category.todos.map((todo, todoIndex) => (
             <>
-              <Item item={todo} handleCheckBox={handleCheckBox} todo={true} />
-              {todo.subtasks.map((subtask, index) => (
-                <>
-                  <Item
-                    item={todo}
-                    handleCheckBox={handleCheckBox}
-                    todo={false}
+              <Item
+                key={todoIndex}
+                item={todo}
+                handleCheckBox={handleCheckBox}
+                todo={true}
+              />
+              {new Date(todo.due_date) < new Date() ? null : (
+                <Box display="flex" alignItems="center" marginLeft={4}>
+                  <DateRange fontSize="small" color="primary" />
+                  <Typography
+                    variant="body1"
+                    color="primary"
+                    marginLeft={0.5}
+                    textAlign={'center'}
+                    fontSize="10"
+                  >
+                    {`Due in ${Math.ceil(
+                      (new Date(todo.due_date).getTime() -
+                        new Date().getTime()) /
+                        (24 * 60 * 60 * 1000)
+                    )} days`}
+                  </Typography>
+                </Box>
+              )}
+              <Box sx={{ ml: 3, width: '60%' }}>
+                {todo.subtasks.map((subtask, subTaskindex) => (
+                  <>
+                    <Item
+                      key={subTaskindex}
+                      item={subtask}
+                      handleCheckBox={handleCheckBox}
+                      todo={false}
+                    />
+                  </>
+                ))}
+                <div style={{ marginLeft: 10 }}>
+                  <TextField
+                    id="add-subtask"
+                    label="Add sub task..."
+                    type="text"
+                    value={subtask}
+                    variant="standard"
+                    onChange={(e) => {
+                      setSubtask(e.target.value);
+                    }}
+                    fullWidth
+                    InputProps={{
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton
+                            onClick={() => handleAddSubtask(todo._id)}
+                          >
+                            <Add />
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                      disableUnderline: true,
+                    }}
                   />
-                </>
-              ))}
+                  <label style={{ color: 'red', marginLeft: 15 }}>
+                    {addSubtaskError}
+                  </label>
+                </div>
+              </Box>
             </>
           ))}
           {category.todos.length === 0 && (
             <Typography
               variant="body2"
-              sx={{
-                color: 'red',
-                marginLeft: '20px',
-                fontStyle: 'italic',
-              }}
+              sx={{ color: 'red', marginLeft: '20px', fontStyle: 'italic' }}
             >
               No todos available.
             </Typography>
           )}
         </CardContent>
-        <Box
-          sx={{
-            '& .MuiTextField-root': { ml: 5, width: '80%' },
-          }}
-        >
+        <Box sx={{ '& .MuiTextField-root': { ml: 5, width: '80%' } }}>
           <div>
             <TextField
-              id="standard-search"
+              id="add-todo"
               label="Write a task..."
               type="text"
               value={title}
@@ -103,6 +167,11 @@ export function CategoryCard({
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
+                    <input
+                      type="date"
+                      // min={new Date().toISOString().split('T')[0]}
+                      onChange={(e) => setDate(e.currentTarget.value)}
+                    />
                     <IconButton onClick={() => handleAddTask(category._id)}>
                       <Add />
                     </IconButton>
@@ -111,9 +180,12 @@ export function CategoryCard({
                 disableUnderline: true,
               }}
             />
+            <label style={{ color: 'red', marginLeft: 50 }}>
+              {addTodoError}
+            </label>
           </div>
         </Box>
       </Collapse>
-    </>
+    </Box>
   );
 }

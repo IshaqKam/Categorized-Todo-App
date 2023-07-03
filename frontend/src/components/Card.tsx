@@ -1,29 +1,30 @@
 import { useEffect, useState, ChangeEvent } from 'react';
-import { KeyboardArrowDown, Add } from '@mui/icons-material';
 import {
+  Card,
   InputAdornment,
   IconButton,
-  Collapse,
-  CardContent,
-  Card,
-  Typography,
-  Box,
   TextField,
-  Checkbox,
+  Box,
 } from '@mui/material';
 
-import ExpandIconButton from './ExpandIconButton';
-import { GetAllCategories } from '@/services/category';
-import { UpdateSubtaskStatus } from '@/services/subTask';
+import { AddCategory, GetAllCategories } from '@/services/category';
+import { AddSubtask, UpdateSubtaskStatus } from '@/services/subTask';
 import { AddTodo, UpdateTodoStatus } from '@/services/todo';
 import { CategoryCard } from './CategoryCard';
+import { Add } from '@mui/icons-material';
 
 const label = { inputProps: { 'aria-label': 'Todo checkbox' } };
 
 export default function CardBox() {
-  const [expandedIndex, setExpandedIndex] = useState(-1);
-  const [categories, setCategories] = useState<ICategory[]>([]);
   const [title, setTitle] = useState('');
+  const [date, setDate] = useState(null);
+  const [subtask, setSubtask] = useState('');
+  const [category, setCategory] = useState('');
+  const [addTodoError, setAddTodoError] = useState('');
+  const [addCategoryError, setAddCategoryError] = useState('');
+  const [expandedIndex, setExpandedIndex] = useState(-1);
+  const [addSubtaskError, setAddSubtaskError] = useState('');
+  const [categories, setCategories] = useState<ICategory[]>([]);
 
   const handleExpandClick = (index: number) => {
     if (expandedIndex === index) {
@@ -45,9 +46,39 @@ export default function CardBox() {
   }, []);
 
   const handleAddTask = async (categoryId: string) => {
-    await AddTodo({ categoryId, title });
-    await getAllCategories();
-    setTitle('');
+    if (!title) {
+      setAddTodoError('You need to write a todo');
+    } else if (!date) {
+      setAddTodoError('You need to set due date');
+    } else {
+      await AddTodo({ categoryId, title, due_date: String(date) });
+      await getAllCategories();
+      setTitle('');
+      setDate(null);
+      setAddTodoError('');
+    }
+  };
+
+  const handleAddSubtask = async (todoId: string) => {
+    if (!subtask) {
+      setAddSubtaskError('Subtask required');
+    } else {
+      await AddSubtask({ todoId, title: subtask });
+      await getAllCategories();
+      setSubtask('');
+      setAddSubtaskError('');
+    }
+  };
+
+  const handleAddCategory = async () => {
+    if (!category) {
+      setAddCategoryError('Category is required');
+    } else {
+      await AddCategory({ name: category });
+      await getAllCategories();
+      setCategory('');
+      setAddCategoryError('');
+    }
   };
 
   const handleCheckBox = async (
@@ -70,27 +101,73 @@ export default function CardBox() {
         maxHeight: 450,
         height: 450,
         width: 345,
+        display: 'flex',
         padding: '10px',
         overflowY: 'auto',
-        borderTop: '10px solid black',
-        borderRadius: '5px',
-        boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.2)',
-        backgroundColor: '#e5e5e5',
+        position: 'relative',
+        flexDirection: 'column',
+        justifyContent: 'flex-start',
+        '::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: '100%',
+          height: '12px',
+          background: 'black',
+          borderRadius: '0 0 50% 50%',
+        },
+        backgroundColor: '#F4F4F4',
       }}
     >
-      {categories.map((category, index) => (
-        <CategoryCard
-          title={title}
-          index={index}
-          key={category._id}
-          setTitle={setTitle}
-          category={category}
-          expandedIndex={expandedIndex}
-          handleAddTask={handleAddTask}
-          handleCheckBox={handleCheckBox}
-          handleExpandClick={handleExpandClick}
-        />
-      ))}
+      <Box sx={{ '& .MuiTextField-root': { ml: 5, width: '80%', mt: 1 } }}>
+        <div>
+          <TextField
+            label="Add Category"
+            type="text"
+            value={category}
+            variant="standard"
+            onChange={(e) => {
+              setCategory(e.target.value);
+            }}
+            fullWidth
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton onClick={handleAddCategory}>
+                    <Add />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <label style={{ color: 'red', marginLeft: 40 }}>
+            {addCategoryError}
+          </label>
+        </div>
+      </Box>
+      <div>
+        {categories.map((category, index) => (
+          <CategoryCard
+            title={title}
+            index={index}
+            setDate={setDate}
+            subtask={subtask}
+            key={category._id}
+            setTitle={setTitle}
+            category={category}
+            setSubtask={setSubtask}
+            addTodoError={addTodoError}
+            expandedIndex={expandedIndex}
+            handleAddTask={handleAddTask}
+            handleCheckBox={handleCheckBox}
+            addSubtaskError={addSubtaskError}
+            handleAddSubtask={handleAddSubtask}
+            handleExpandClick={handleExpandClick}
+          />
+        ))}
+      </div>
     </Card>
   );
 }
